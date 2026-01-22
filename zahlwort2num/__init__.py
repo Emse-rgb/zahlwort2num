@@ -60,7 +60,7 @@ class ZahlConverter:
         'zehntel': 10,  # for "ein zehntel" = 1/10
     }
 
-    ORD_SUFFIXES = ['te', 'ter', 'tes', 'tem', 'ten']
+    ORD_SUFFIXES = ['stem', 'ste', 'ter', 'tes', 'tem', 'ten', 'e', 'te']
     SCALES = ['million', 'milliarde', 'billion', 'billiarde', 'trillion', 'trilliarde', 'quadrillion', 'quadrilliarde', 'quintillion', 'sextillion', 'septillion', 'oktillion', 'nonillion', 'dezillion']
     MAX_SCALE_IDX = len(SCALES) - 1
 
@@ -89,33 +89,46 @@ class ZahlConverter:
         return result
 
     def _convert_ordinal(self, number: str) -> str:
-        for suffix in self.ORD_SUFFIXES:
-            if number.endswith(suffix):
-                if suffix == 'e':
-                    # Special case for ordinals ending with 'e' (like 'achte')
-                    base_number = number[:-1]
-                elif suffix == 'te' and len(number) > 3 and number[-3] == 's':
-                    # Special case for ordinals like 'erste' -> 'erst' + 'e' but we have 'erste' -> 'er'
-                    base_number = number[:-3]
-                elif suffix == 'te':
-                    # For 'te' suffix, remove 'te' and check if we need to remove more
-                    base_number = number[:-2]
-                    # If the remaining ends with 't', remove it too (for cases like 'zwanzigste' -> 'zwanzig')
-                    if base_number.endswith('t'):
-                        base_number = base_number[:-1]
-                else:
-                    # For other suffixes, just remove the suffix
-                    base_number = number[:-len(suffix)]
-                try:
-                    base_number_value = self.convt2(base_number)
-                    return f"{base_number_value}."
-                except ValueError:
-                    # If base_number contains invalid words, treat as non-ordinal
-                    pass
+        # First try to convert as a regular number
         try:
-            return str(self.convt2(number))
+            regular_result = self.convt2(number)
+            return str(regular_result)
         except ValueError:
-            # If the number contains invalid words, this is an error
+            # If regular conversion fails, check if it's an ordinal
+            for suffix in self.ORD_SUFFIXES:
+                if number.endswith(suffix):
+                    if suffix == 'e':
+                        # Special case for ordinals ending with 'e' (like 'achte')
+                        base_number = number[:-1]
+                    elif suffix == 'te' and len(number) > 3 and number[-3] == 's':
+                        # Special case for ordinals like 'erste' -> 'erst' + 'e' but we have 'erste' -> 'er'
+                        base_number = number[:-3]
+                    elif suffix == 'te':
+                        # For 'te' suffix, remove 'te' and check if we need to remove more
+                        base_number = number[:-2]
+                        # If the remaining ends with 't', remove it too (for cases like 'zwanzigste' -> 'zwanzig')
+                        if base_number.endswith('t'):
+                            base_number = base_number[:-1]
+                    elif suffix == 'ste':
+                        # For 'ste' suffix, remove 'ste' and check if we need to remove more
+                        base_number = number[:-3]
+                        # If the remaining ends with 't', remove it too (for cases like 'zwanzigste' -> 'zwanzig')
+                        if base_number.endswith('t'):
+                            base_number = base_number[:-1]
+                    elif suffix == 'stem':
+                        # For 'stem' suffix, remove 'stem' entirely
+                        base_number = number[:-4]
+                    else:
+                        # For other suffixes, just remove the suffix
+                        base_number = number[:-len(suffix)]
+                    try:
+                        base_number_value = self.convt2(base_number)
+                        return f"{base_number_value}."
+                    except ValueError:
+                        # If base_number contains invalid words, continue checking other suffixes
+                        continue
+            
+            # If no ordinal suffix works either, this is an error
             raise ValueError(f"Cannot convert '{number}' to a number")
 
     def _convert_big_numbers(self, number: str, idx: int):

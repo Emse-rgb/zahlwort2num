@@ -13,5 +13,4 @@ def main():
             print(f"Error: {e}", file=sys.stderr)
             sys.exit(1)
     else:
-        print("Usage: zahlwort2num-convert <german_number_words>", file=sys.stderr)
-        sys.exit(1)
+        raise ArgumentError(None, "Usage: zahlwort2num-convert <german_number_words>")
