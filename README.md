@@ -1,96 +1,135 @@
-# ZahlWort2num (v.0.4.2)
+# ZahlWort2num (v.0.4.3)
 
-:de: :de: :de:
-A small but useful (due shortage of/low quality support for `lang_de`) package for handy conversion of german numerals (incl. ordinal number) written as string to the from numbers. 
+🇩🇪 🇩🇪 🇩🇪
+A small but useful package (due to shortage of/low quality support for `lang_de`) for handy conversion of German numerals (incl. ordinal numbers) written as strings to numbers.
 
 To put it differently: _It allows reverse text normalization for numbers_.
 
 This package might be a good complementary lib to https://github.com/savoirfairelinux/num2words
 
-:crying_cat_face: _Currently is doesn't support swiss variant. TBD_ :switzerland:
-
-# PyPi direct page of project 
+# PyPI Project Page
 https://pypi.org/project/zahlwort2num/
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [Features](#features-)
+- [Development](#development)
+- [Roadmap / Known Issues](#roadmap--known-issues)
+- [Acknowledgments](#acknowledgments-)
 
 # Installation
 
-`pip2 install zahlwort2num`
+```bash
+pip install zahlwort2num
+```
 
 # Usage
 
-### _Definition_: <br />
+### Basic Usage
 
 ```python
 import zahlwort2num as w2n
 ```
 
-### _Few examples_: <br />
- ```python
- w2n.convert('Zweihundertfünfundzwanzig') # => 225
- w2n.convert('neunte') # => '9.' 
- w2n.convert('minus siebenhundert Millionen achtundsiebzig') # => -700000078
-```
- _or even stuff like:_  :see_no_evil:  <br />
- ```python
- w2n.convert('sechshundertdreiundfünfzigtausendfünfhunderteinundzwanzig') # => 653521
-```
- 
-#### Command line: 
+### Examples
 
-* _(Obviously it is better to use a parameter enclosed with apostrophs due to possible spaces)_
+```python
+# Basic cardinal numbers
+w2n.convert('Zweihundertfünfundzwanzig')  # => 225
+
+# Ordinal numbers (return as string with dot)
+w2n.convert('neunte')  # => '9.'
+
+# Negative numbers
+w2n.convert('minus siebenhundert Millionen achtundsiebzig')  # => -700000078
+
+# Complex large numbers
+w2n.convert('sechshundertdreiundfünfzigtausendfünfhunderteinundzwanzig')  # => 653521
+
+# Fractions
+w2n.convert('ein und zwei')  # => 0.5
 ```
-bin/zahlwort2num-convert 'eine Million siebenhunderteinundzwanzig'
+
+### Command Line Usage
+
+Use quotes around parameters containing spaces:
+
+```bash
+zahlwort2num-convert 'eine Million siebenhunderteinundzwanzig'
 ```
 
 # Development
-Before doing anything. Install flake8 locally by 
+
+### Setup
+
+Install development dependencies:
+
 ```bash
 python3 -m pip install -r requirements.txt
 ```
 
-Make sure tests are passing 
+### Testing
+
+Run the test suite:
+
 ```bash
 python3 -m unittest
 ```
-and you locally run linter via
+
+### Linting
+
+Run the linter:
+
 ```bash
 flake8 ./zahlwort2num/*.py --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 ```
 
-# WIKI
-TBD
+# Documentation
 
-# Already implemented features :sunglasses:
-* Theoretically it works for any numbers from range 0 upto 999 * 10^27 [big numbers]
-* Command-line mode ([see](#command-line) above)
-* Supported with ordinal numerals (incl. inflections [sufficies like `'ste', 'ten'` etc. ])<br />
-  _In this case it returns coerced __String__ type value e.g '15.' instead of __Integer___ :point_up: 
-* Relative mild rules in terms of trailing whitespaces, lower/upper-case (unification).
-* Handling of signed numerals (also ordinal ones) e.g `'minus zehn'`
+*More comprehensive documentation and examples coming soon.*
 
-# TODO / Known issues
+# Features ✨
+
+- **Large Numbers**: Theoretically supports numbers from 0 up to 999 × 10^27
+- **Command Line Interface**: Use from terminal with `zahlwort2num-convert`
+- **Ordinal Numbers**: Supports ordinal numerals (e.g., "erste", "zweite") with inflections (suffixes like 'ste', 'ten', etc.)
+  - Returns strings with dots for ordinals (e.g., '15.' instead of integer)
+- **Case & Whitespace Handling**: Fault-tolerant with trailing whitespaces and case variations
+- **Signed Numbers**: Handles negative numbers (e.g., 'minus zehn') and negative ordinals
+- **Swiss German Support**: Includes Swiss variants (e.g., "dreissig" vs "dreißig")
+- **Fault Tolerance**: Handles ß → ss conversion and other common variations
+- **Fraction Support**: Basic fraction conversion (e.g., "ein und zwei" → 0.5)
+
+# Roadmap / Known Issues
+
 - [x] ~~Make POC, functional for all common cases~~
 - [x] ~~Ordinal number support~~
-- [x] ~~Take care for exceptions / trailing whitespaces etc.~~
-- [x] ~~Make structure + publish as PyPI package~~
-- [x] ~~Command line support :computer:~~
-- [x] ~~Added support for both non-direct usage e.g einhundert / hundert~~
-- [x] ~~Simplify/refactor POC code, add better documentation~~
-- [x] ~~Zwo variant~~
-- [x] ~~Added linter with Test Suite as hook~~
-- [ ] More comprehensible tests
-- [ ] Swiss variant
-- [ ] More fault tolerant (ß -> ss) etc
-- [ ] Larger scale than 10^60
-- [ ] Ordinal with very large numbers (without addons) e.g `Millionste`
-- [ ] Few benchmark improvements (e.g tail recursion etc)
-- [ ] Better error handling + validation for idiotical cases (e.g `minus null Miliarde`)
+- [x] ~~Handle exceptions and trailing whitespaces~~
+- [x] ~~Create package structure and publish to PyPI~~
+- [x] ~~Command line support~~
+- [x] ~~Support both direct and indirect forms (einhundert/hundert)~~
+- [x] ~~Simplify/refactor POC code and improve documentation~~
+- [x] ~~Add "zwo" variant support~~
+- [x] ~~Add linter and test suite~~
+- [x] ~~Swiss German variants~~
+- [x] ~~Fault tolerance (ß → ss conversion)~~
+- [x] ~~Support for scales larger than 10^60~~
+- [x] ~~Ordinal numbers with large scales (e.g., "Millionste")~~
+- [x] ~~Performance improvements (tail recursion, etc.)~~
+- [x] ~~Better error handling and validation~~
+- [x] ~~Basic fraction support~~
+- [ ] More comprehensive test cases
+- [ ] Extended fraction support (e.g., "drei viertel" → 0.75)
+- [ ] Decimal number support (e.g., "zwei komma fünf" → 2.5)
+- [ ] Austrian German variants
 
-- [ ] Support for fractions?
 
+# Acknowledgments 🙏
 
-# Thanks 
-- @warichet for addressing problem 
-- @spatialbitz for writing simple fix :+1:
-- @psawa - adding support for `zwo` case
-- ... lastly to any of you who uses this package ;-) 
+Special thanks to:
+- [@warichet](https://github.com/warichet) for addressing issues
+- [@spatialbitz](https://github.com/spatialbitz) for providing fixes
+- [@psawa](https://github.com/psawa) for adding "zwo" variant support
+- All contributors and users of this package!

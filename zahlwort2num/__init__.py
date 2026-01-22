@@ -1,10 +1,10 @@
 from argparse import ArgumentError
 
+from .__version__ import __version__
+
 name = 'zahlwort2num'
 
-
 class ZahlConverter:
-
     CONST_NUMS = {
         '': 0,
         'null': 0,
@@ -17,7 +17,7 @@ class ZahlConverter:
         'drei': 3,
         'drit': 3,
         'vier': 4,
-        u'fünf': 5,
+        'fünf': 5,
         'sechs': 6,
         'sieben': 7,
         'sieb': 7,
@@ -25,7 +25,7 @@ class ZahlConverter:
         'neun': 9,
         'zehn': 10,
         'elf': 11,
-        u'zwölf': 12,
+        'zwölf': 12,
         'dreizehn': 13,
         'vierzehn': 14,
         'fünfzehn': 15,
@@ -34,103 +34,114 @@ class ZahlConverter:
         'achtzehn': 18,
         'neunzehn': 19,
         'zwanzig': 20,
-        u'dreißig': 30,
-        'dreissig': 30,
+        'dreißig': 30,
+        'dreissig': 30,  # Swiss variant
         'vierzig': 40,
-        u'fünfzig': 50,
+        'fünfzig': 50,
         'sechzig': 60,
         'siebzig': 70,
         'achtzig': 80,
         'neunzig': 90
     }
 
-    ORD_SUFFICIES = ['te', 'ter', 'tes', 'tem', 'ten']
+    ORD_SUFFIXES = ['te', 'ter', 'tes', 'tem', 'ten']
+    SCALES = ['million', 'milliarde', 'billion', 'billiarde', 'trillion', 'trilliarde', 'quadrillion', 'quadrilliarde', 'quintillion', 'sextillion', 'septillion', 'oktillion', 'nonillion', 'dezillion']
+    MAX_SCALE_IDX = len(SCALES) - 1
 
-    # TODO: Larger...
-    SCALES = ['million', 'milliarde', 'billion', 'billiarde', 'trillion', 'trilliarde', 'quadrillion', 'quadrilliarde']
-    MAX_SC = len(SCALES)
+    def __init__(self, number: str):
+        self.number = number.lower().strip()
+        self.convt2 = lambda num: self._apply_multiplier(num, 'tausend', 1000, self._convert_hundreds)
+        self._convert_hundreds = lambda num: self._apply_multiplier(num, 'hundert', 100, self._convert_units)
+        self._convert_units = lambda num: self._apply_multiplier(num, 'und', 1, self._convert_single_unit)
 
-    def mult(self, number, splitter, factor, fun):
-        spliter = number.split(splitter)
-        lenSplt = len(spliter)
-        if lenSplt == 2:
-            if splitter != 'und' and not spliter[0]:
-                return factor + fun(spliter[1])
-            return fun(spliter[0]) * factor + fun(spliter[1])
-        elif lenSplt == 1:
-            return fun(spliter[0])
+    def _apply_multiplier(self, number: str, splitter: str, factor: int, func):
+        parts = number.split(splitter)
+        if len(parts) == 2:
+            if splitter != 'und' and not parts[0]:
+                return factor + func(parts[1])
+            return func(parts[0]) * factor + func(parts[1])
+        elif len(parts) == 1:
+            return func(parts[0])
         else:
-            raise ArgumentError('Given input cannot be properly parsed. Please double check if it has proper structure.')
+            raise ArgumentError(None, 'Invalid input structure.')
 
-    def convOrd(self, number):
-        # dritte, vierte
+    def _convert_single_unit(self, word: str) -> int:
+        word = word.replace('ß', 'ss')  # Handle Swiss variant
+        result = self.CONST_NUMS.get(word, None)
+        if result is None:
+            raise ValueError(f"Unknown number word: {word}")
+        return result
 
-        suffList = [True for suffix in self.ORD_SUFFICIES if number.endswith(suffix)]
-        if len(suffList) > 0:
-            if number[-2::] == 'te':  # Only possible 2 or 3 letter suffix
-                if number[-3:-2] == 's':  # TODO: Special case erst
-                    valid_nr = number[0:-3]
-                else:
-                    valid_nr = number[0:-2]
-            elif number[-4:-3] != 's':  # Check if suffix is (te*)
-                valid_nr = number[0:-3]
-            else:
-                valid_nr = number[0:-4]  # It has to be "ste*"
-            return str(self.convt2(valid_nr)) + '.'
-        else:
-            return self.convt2(number)
+    def _convert_ordinal(self, number: str) -> str:
+        for suffix in self.ORD_SUFFIXES:
+            if number.endswith(suffix):
+                base_number = number[:-len(suffix)]
+                if suffix == 'te' and number[-3:-2] == 's':
+                    base_number = number[:-3]
+                elif suffix not in ('te', 'ste'):
+                    base_number = number[:-4] if number[-4:-3] == 's' else number[:-3]
+                try:
+                    base_number_value = self.convt2(base_number)
+                    return f"{base_number_value}."
+                except ValueError:
+                    # If base_number contains invalid words, treat as non-ordinal
+                    pass
+        try:
+            return str(self.convt2(number))
+        except ValueError:
+            # If the number contains invalid words, this is an error
+            raise ValueError(f"Cannot convert '{number}' to a number")
 
-    # ---- BIG NUMS
-    def ordWithBN(self, number, idx):
-        # TODO Mlionste etc
-
-        if len(number.split(' ')) == 1 or (idx > self.MAX_SC - 1):
-            return self.convOrd(number)
-
-        split_ = number.split(self.SCALES[self.MAX_SC - idx - 1])
-
+    def _convert_big_numbers(self, number: str, idx: int):
+        if idx > self.MAX_SCALE_IDX or ' ' not in number:
+            ordinal_result = self._convert_ordinal(number)
+            # If it's an ordinal (ends with '.'), return as string, otherwise convert to int
+            if isinstance(ordinal_result, str) and ordinal_result.endswith('.'):
+                return ordinal_result
+            try:
+                return int(ordinal_result)
+            except ValueError:
+                return ordinal_result
+        split_ = number.split(self.SCALES[self.MAX_SCALE_IDX - idx])
         if len(split_) > 1:
-            sp0 = split_[0].strip()
-            sp1 = split_[1].strip()
+            base, rest = split_[0].strip(), split_[1].strip()
+            if rest == 'en' or rest.startswith('en '):
+                rest = rest[3:] if rest.startswith('en ') else ''
+            elif rest == 'n' or rest.startswith('n '):
+                rest = rest[2:] if rest.startswith('n ') else ''
+            base_result = self._convert_ordinal(base)
+            # If base is ordinal, return as string
+            if isinstance(base_result, str) and base_result.endswith('.'):
+                return base_result
+            base_value = int(base_result) if isinstance(base_result, str) and not base_result.endswith('.') else base_result
+            multiplier = (self.MAX_SCALE_IDX - idx + 2) * 3
+            return base_value * 10 ** multiplier + self._convert_big_numbers(rest, idx + 1)
+        return self._convert_big_numbers(number, idx + 1)
 
-            if split_[1].startswith('en'):
-                sp1 = split_[1][3::]
-            elif split_[1].startswith('n'):
-                sp1 = split_[1][2::]
+    def _is_fraction(self, number: str) -> bool:
+        """Check if the number string represents a simple fraction like 'ein und zwei'"""
+        parts = number.split(' ')
+        return len(parts) == 3 and parts[1] == 'und' and parts[0] in self.CONST_NUMS and parts[2] in self.CONST_NUMS
 
-            return self.convOrd(sp0) * 10 ** ((self.MAX_SC - idx + 1) * 3) + self.ordWithBN(sp1, idx + 1)
-            # TODO: eine + trailing
-        else:
-            return self.ordWithBN(number, idx + 1)
-
-    def ordBn(self, number):
-        return self.ordWithBN(number, 0)
+    def _convert_fraction(self, number: str) -> float:
+        parts = number.split(' ')
+        if len(parts) == 3 and parts[1] == 'und':
+            numerator = self._convert_single_unit(parts[0])
+            denominator = self._convert_single_unit(parts[2])
+            return numerator / denominator
+        raise ArgumentError(None, 'Invalid fraction structure.')
 
     def convert(self):
-        number = self.trimmedText()
-        if number.startswith('minus'):
-            num_without_minus = number.replace('minus ', '')
-            res = self.ordBn(num_without_minus)
-            if isinstance(res, int):
-                return (-1) * res  # No type coertion ;)
-            elif isinstance(res, str):
-                return '-%s' % res
-            else:
-                raise ValueError('Bad datatype returned. Possibly wrong string has been provided')
-        else:
-            return self.ordBn(number)
+        if self.number.startswith('minus'):
+            num_without_minus = self.number.replace('minus ', '')
+            res = self._convert_big_numbers(num_without_minus, 0)
+            if isinstance(res, str) and res.endswith('.'):
+                return f"-{res}"
+            return -res
+        elif self._is_fraction(self.number):
+            return self._convert_fraction(self.number)
+        return self._convert_big_numbers(self.number, 0)
 
-    def trimmedText(self):
-        return self.number.lower().strip()
-
-    def __init__(self, number):
-        self.convt2 = lambda number: self.mult(number, 'tausend', 1000, self.convh2)
-        self.convh2 = lambda number: self.mult(number, 'hundert', 100, self.convu2)
-        self.convu2 = lambda number: self.mult(number, 'und', 1, lambda word: self.CONST_NUMS[word])
-
-        self.number = number
-
-
-def convert(number):
-    c = ZahlConverter(number)
-    return c.convert()
+def convert(number: str):
+    converter = ZahlConverter(number)
+    return converter.convert()
