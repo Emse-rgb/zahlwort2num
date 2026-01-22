@@ -253,6 +253,112 @@
             transform: translateY(-2px);
         }
 
+        /* Fun Facts Section */
+        .fun-facts {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            padding: 80px 0;
+            position: relative;
+        }
+
+        .fun-facts::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #e9ecef, transparent);
+        }
+
+        .fun-facts h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 60px;
+            color: #333;
+            position: relative;
+        }
+
+        .fun-facts h2::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+        .facts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+        }
+
+        .fact {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .fact::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .fact:hover::before {
+            transform: scaleX(1);
+        }
+
+        .fact:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .fact-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 24px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .fact:hover .fact-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .fact h3 {
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1.5rem;
+        }
+
+        .fact p {
+            color: #666;
+            line-height: 1.6;
+            margin: 0;
+        }
+
         /* Demo Section */
         .demo {
             background: white;
@@ -828,10 +934,38 @@
     <section class="hero">
         <div class="container">
             <h1>ZahlWort2num</h1>
-            <p class="subtitle">Convert German written numerals to numbers with ease. From "Zweihundertfünfundzwanzig" to 225 in seconds.</p>
+            <p class="subtitle">Transform German number words into actual numbers instantly! 🇩🇪 From "Zweihundertfünfundzwanzig" to 225, handle ordinals, negatives, and numbers up to 999 × 10²⁷.</p>
             <div class="cta-buttons">
                 <a href="#installation" class="btn btn-primary">Get Started</a>
                 <a href="https://pypi.org/project/zahlwort2num/" class="btn btn-secondary">View on PyPI</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="fun-facts">
+        <div class="container">
+            <h2>Did You Know? 🤔</h2>
+            <div class="facts-grid">
+                <div class="fact">
+                    <div class="fact-icon">🔢</div>
+                    <h3>999 × 10²⁷</h3>
+                    <p>The largest number this package can handle - that's a 28-digit number!</p>
+                </div>
+                <div class="fact">
+                    <div class="fact-icon">🇩🇪</div>
+                    <h3>German Precision</h3>
+                    <p>German numbers are written as one word, unlike English "twenty-five" → German "fünfundzwanzig"</p>
+                </div>
+                <div class="fact">
+                    <div class="fact-icon">🧮</div>
+                    <h3>Swiss Variants</h3>
+                    <p>Supports both "dreißig" and Swiss "dreissig" - the package handles regional differences!</p>
+                </div>
+                <div class="fact">
+                    <div class="fact-icon">⚡</div>
+                    <h3>Instant Conversion</h3>
+                    <p>Process complex numbers like "siebenhundert trillion" in milliseconds</p>
+                </div>
             </div>
         </div>
     </section>
@@ -863,12 +997,28 @@
                             <div class="result">→ "9."</div>
                         </div>
                         <div class="example">
+                            <div class="german">"ein und zwei"</div>
+                            <div class="result">→ 0.5</div>
+                        </div>
+                        <div class="example">
                             <div class="german">"minus siebenhundert Millionen achtundsiebzig"</div>
                             <div class="result">→ -700000078</div>
                         </div>
                         <div class="example">
                             <div class="german">"sechshundertdreiundfünfzigtausendfünfhunderteinundzwanzig"</div>
                             <div class="result">→ 653521</div>
+                        </div>
+                        <div class="example">
+                            <div class="german">"eine Million zweihunderttausend"</div>
+                            <div class="result">→ 1200000</div>
+                        </div>
+                        <div class="example">
+                            <div class="german">"zweiundzwanzigste"</div>
+                            <div class="result">→ "22."</div>
+                        </div>
+                        <div class="example">
+                            <div class="german">"null"</div>
+                            <div class="result">→ 0</div>
                         </div>
                     </div>
                 </div>
@@ -909,6 +1059,35 @@
                     <div class="feature-icon">🔧</div>
                     <h3>Fault Tolerant</h3>
                     <p>Handles various input formats, case insensitive, and includes Swiss variants (ß → ss).</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="roadmap">
+        <div class="container">
+            <h2>Coming Soon 🚀</h2>
+            <p class="roadmap-subtitle">Exciting new features are being developed to make ZahlWort2num even more powerful!</p>
+            <div class="roadmap-grid">
+                <div class="roadmap-item">
+                    <div class="roadmap-icon">📈</div>
+                    <h3>Extended Fractions</h3>
+                    <p>Support for complex fractions like "drei viertel" → 0.75</p>
+                </div>
+                <div class="roadmap-item">
+                    <div class="roadmap-icon">🔢</div>
+                    <h3>Decimal Numbers</h3>
+                    <p>Handle decimal numbers like "zwei komma fünf" → 2.5</p>
+                </div>
+                <div class="roadmap-item">
+                    <div class="roadmap-icon">🇦🇹</div>
+                    <h3>Austrian Variants</h3>
+                    <p>Add support for Austrian German number variations</p>
+                </div>
+                <div class="roadmap-item">
+                    <div class="roadmap-icon">🧪</div>
+                    <h3>More Test Cases</h3>
+                    <p>Comprehensive test suite for maximum reliability</p>
                 </div>
             </div>
         </div>

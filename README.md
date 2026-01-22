@@ -10,6 +10,9 @@ This package might be a good complementary lib to https://github.com/savoirfaire
 # PyPI Project Page
 https://pypi.org/project/zahlwort2num/
 
+# Web Demo
+Try the interactive web demo: [zahlwort2num Demo](index.html)
+
 ## Table of Contents
 
 - [Installation](#installation)
@@ -83,6 +86,9 @@ python3 -m unittest
 Run the linter:
 
 ```bash
+python3 -m venv venv
+source ./venv/bin/activate
+python3 -m pip install flake8
 flake8 ./zahlwort2num/*.py --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 ```
 
